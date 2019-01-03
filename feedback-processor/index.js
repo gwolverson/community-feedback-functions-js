@@ -30,7 +30,7 @@ const storeAttendanceData = data => {
         S: name
       },
       'datetime': {
-        S: date.toUTCString()
+        S: date.toISOString().substring(0, 10)
       } 
     }
   }
@@ -43,3 +43,10 @@ const storeAttendanceData = data => {
     }
   });
 }
+
+// let data = {
+//   communityName: 'awesome-test',
+//   name: 'Joe Bloggs'
+// }
+
+// storeAttendanceData(data, res => console.log(res))

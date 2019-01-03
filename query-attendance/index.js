@@ -1,41 +1,20 @@
-const AWS = require('aws-sdk');
-
-AWS.config.update({region: 'eu-west-2'});
-
-//const ddb = new AWS.DynamoDB({apiVersion: '2012-10-08'})
-const ddb = new AWS.DynamoDB.DocumentClient();
-const table = 'community-attendance'
+const {
+  queryAttendanceByCommunityName, 
+  queryAttendanceByDatetime
+} = require('./queryApi');
 
 exports.handler = (event, context, callback) => {
-  queryAttendance(event, data => {
-    callback(null, data);
-  });
-}
-
-const queryAttendance = (query, callback) => {
-  const params = {
-    TableName: table,
-    ExpressionAttributeNames: {
-      '#communityName': 'communityName'
-    },
-    ExpressionAttributeValues: {
-      ':communityName': query.communityName
-    },
-    FilterExpression: '#communityName = :communityName'
+  const params  =event.queryStringParameters;
+  if(params.communityName) {
+    queryAttendanceByCommunityName(params.communityName, data => {
+      console.log(data)
+      callback(null, data);
+    });
+  } else if(params.datetime) {
+    queryAttendanceByDatetime(params.datetime, data => {
+      callback(null, data);
+    });
+  } else {
+    callback(null, {"statusCode": 400, "body": "One of communityName OR datetime must be provided (both can be used)"});
   }
-
-  ddb.scan(params, (err, data) => {
-    if(err) {
-      console.log("Error", err)
-    } else {
-      console.log("Success", data.Items)
-    }
-    callback(data.Items)
-  })
 }
-
-const q = {
-  communityName: 'awesome-dev'
-}
-
-queryAttendance(q, res => console.log(res))
